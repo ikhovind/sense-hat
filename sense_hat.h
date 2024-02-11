@@ -10,7 +10,7 @@ SenseHat* get_sense_hat_pointer(char* address);
 
 void print_sense_hat(SenseHat* sense_hat);
 
-void clear_sense_hat(SenseHat* to_be_cleared);
+void fill_sense_hat(SenseHat* sense_hat, uint16_t color);
 
 void close_sense_hat(SenseHat* to_be_closed);
 

@@ -24,6 +24,7 @@
 #include <unistd.h>
 
 #include "sense_hat.h"
+#include "util.h"
 
 #define FILEPATH "/dev/fb0"
 #define NUM_WORDS 64
@@ -35,6 +36,8 @@ int main(void) {
   SenseHat* a = get_sense_hat_pointer(FILEPATH);
   printf("return sense hat: %x\n", a->map);
   print_sense_hat(a);
-  clear_sense_hat(a);
+  fill_sense_hat(a, RGB565_RED);
+  delay(1000);
+  fill_sense_hat(a, 0);
   close_sense_hat(a); //printf("SenseHat(%x, %x)", a->file_desc, a->map);
 }

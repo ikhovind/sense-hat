@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 #include "sense_hat.h"
+#include "util.h"
 
 #define NUM_WORDS 64
 #define FILESIZE (NUM_WORDS * sizeof(uint16_t))
@@ -19,10 +20,6 @@
 
 uint8_t has_been_initialized = 0;
 SenseHat g_sense_hat;
-
-void delay(int t) {
-    usleep(t * 1000);
-}
 
 SenseHat* get_sense_hat_pointer(char* address) {
   if (!has_been_initialized) {
@@ -59,17 +56,15 @@ SenseHat* get_sense_hat_pointer(char* address) {
           perror("Error mmapping the file");
           exit(EXIT_FAILURE);
       }
-
           /* light it up! */
       for (int i = 0; i < NUM_WORDS; i++) {
-          printf("map2 : %x\n", map);
           *(map + i) = 0xF;
           delay(25);
       }
 
       g_sense_hat = (SenseHat) { .map = map, .file_desc = fbfd };
       has_been_initialized = 1;
-      clear_sense_hat(&g_sense_hat);
+      fill_sense_hat(&g_sense_hat, 0);
   }
   memset(g_sense_hat.map, 0, FILESIZE);
 
@@ -81,13 +76,21 @@ void print_sense_hat(SenseHat* sense_hat) {
   printf("SenseHat(map: 0x%x, file_desc: %d)\n", sense_hat->map, sense_hat->file_desc);
 }
 
-void clear_sense_hat(SenseHat* to_be_cleared) {
-  printf("Clearing sense hat\n");
-  memset(to_be_cleared->map, 0, FILESIZE);
-  delay(20);
+void fill_sense_hat(SenseHat* sense_hat, uint16_t color) {
+  printf("filling sense hat with 0x%x\n", color);
+  print_sense_hat(sense_hat);
+  for (int i = 0; i < NUM_WORDS; i++) {
+      *(sense_hat->map + i) = color;
+      delay(25);
+  }
+
+  // this only works for values below 256
+  memset(sense_hat->map, (int)color, FILESIZE);
+  delay(1000);
 }
 
 void close_sense_hat(SenseHat* to_be_closed) {
+   delay(20);
    /* un-map and close */
     printf("Closing sense hat\n");
     if (munmap(to_be_closed->map, FILESIZE) == -1) {
